@@ -27,5 +27,6 @@
 		int TotalStatelessStoredCurrent { get; }
 
 		void DisposeAllInCurrentContext();
+		void DisposeAllInCurrentContext();
 	}
 }

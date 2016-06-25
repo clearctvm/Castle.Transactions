@@ -11,7 +11,7 @@
 	public class Activity2 : IDisposable
 	{
 		private readonly IActivityManager2 _manager;
-		private readonly int _id;
+		internal readonly int _id;
 		private readonly ILogger _logger;
 		private ConcurrentStack<ITransaction2> _stack;
 		private volatile bool _disposed;
@@ -48,6 +48,11 @@
 		public bool IsEmpty
 		{
 			get { return _stack.IsEmpty; }
+		}
+
+		public void Detach()
+		{
+			_manager.Detach(this);
 		}
 
 		public void Push(ITransaction2 transaction)

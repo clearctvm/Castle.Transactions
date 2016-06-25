@@ -52,6 +52,7 @@
     <Compile Include="Facility\TransactionInterceptor.cs" />
     <Compile Include="Internal\Activity2.cs" />
     <Compile Include="Internal\AsyncLocalActivityManager.cs" />
+    <Compile Include="Internal\CallCtxActivityManager2.cs" />
     <Compile Include="Internal\IActivityManager2.cs" />
     <Compile Include="ITransaction2.cs" />
     <Compile Include="ITransactionManager2.cs" />

@@ -102,6 +102,9 @@
 				// When promised to complete in the future - should this be a case for DependentTransaction?
 				// Transaction.Current.DependentClone(DependentCloneOption.BlockCommitUntilComplete));
 
+				transaction.DetachContext();
+
+
 				ret.ContinueWith((t, tupleArg) =>
 				{
 					// var tran = (ITransaction2) aTransaction;

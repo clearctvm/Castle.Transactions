@@ -8,7 +8,6 @@
 	using System.Threading.Tasks.Dataflow;
 	using NUnit.Framework;
 
-
 	public class MutableThing
 	{
 		public List<string> Children;

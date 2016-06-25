@@ -63,10 +63,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActivityManager2SanityCheck.cs" />
     <Compile Include="AsynLocalExpTestCase.cs" />
     <Compile Include="AutoTxFacilityTestCase.cs" />
     <Compile Include="Comps\Components.cs" />
     <Compile Include="Comps\EnlistedConfirmation.cs" />
+    <Compile Include="TplFriendlyClass.cs" />
     <Compile Include="TransactionManager2TestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionScopesWithActionBlockExperimentTestCase.cs" />

@@ -23,21 +23,17 @@ namespace Castle.Services.Transaction.Internal
 			if (activity2.IsEmpty)
 			{
 				var ctxActivity = _holder.Value;
-				if (!activity2.Equals(ctxActivity))
+				if (ctxActivity != null && !activity2.Equals(ctxActivity))
 				{
 					// wtf?
 					_logger.Fatal("activity does not match the context one. Expecting " + activity2 + " but found " + ctxActivity);
 				}
+
 				_holder.Value = null; // removes empty activity from context
 
 				activity2.Dispose();
 			}
 		}
-
-//		private void OnValueChanged(AsyncLocalValueChangedArgs<Activity2> args)
-//		{
-//			// Console.WriteLine("OnValueChanged from " + args.PreviousValue + " to " + args.CurrentValue + "  ctx_switch: " + args.ThreadContextChanged);
-//		}
 
 		public ILogger Logger
 		{
@@ -48,11 +44,20 @@ namespace Castle.Services.Transaction.Internal
 		public Activity2 EnsureActivityExists()
 		{
 			var cur = _holder.Value;
+			bool wecreated = false;
 			if (cur == null)
 			{
 				_holder.Value = cur = CreateActivity();
+				wecreated = true;
 			}
-			if (cur.IsDisposed) throw new Exception(cur + " already disposed [" + Thread.CurrentThread.ManagedThreadId + "_" + Thread.CurrentThread.Name + "]");
+			if (cur.IsDisposed)
+			{
+				var msg = cur + " already disposed. we created? " + wecreated + " [" + Thread.CurrentThread.ManagedThreadId + "_" +
+				          Thread.CurrentThread.Name + "]";
+				_logger.Fatal(msg);
+				// throw new Exception(msg);
+				_holder.Value = cur = CreateActivity();
+			}
 			return cur;
 		}
 
@@ -64,6 +69,24 @@ namespace Castle.Services.Transaction.Internal
 				return false;
 			activity = _holder.Value;
 			return true;
+		}
+
+		public void Detach(Activity2 activity2)
+		{
+			// Confirms the context and specified one are the same:
+
+			var ctxActivity = _holder.Value;
+			if (ctxActivity != null && !activity2.Equals(ctxActivity))
+			{
+				_logger.Fatal("Detach: activity does not match the context one. Expecting " + activity2 + " but found " + ctxActivity);	
+			}
+
+			// Remove activity from context so it cannot be reused in the chain
+			_holder.Value = null; 
+		}
+
+		public void Dispose()
+		{
 		}
 
 		private Activity2 CreateActivity()

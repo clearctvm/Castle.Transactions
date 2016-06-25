@@ -19,5 +19,10 @@
 		void Rollback();
 
 		void Complete();
+
+		/// <summary>
+		/// Used when an async op hasnt completed synchronously
+		/// </summary>
+		void DetachContext();
 	}
 }

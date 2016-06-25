@@ -72,6 +72,11 @@ namespace Castle.Services.Transaction
 			_shouldCommit = true;
 		}
 
+		public void DetachContext()
+		{
+			_parentActivity.Detach();
+		}
+
 		public void Dispose()
 		{
 			if (_disposed) return;

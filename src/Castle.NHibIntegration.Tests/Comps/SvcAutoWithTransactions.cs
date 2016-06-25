@@ -1,6 +1,8 @@
 namespace Castle.NHibIntegration.Tests.Comps
 {
 	using System;
+	using System.Threading;
+	using FluentAssertions;
 	using Services.Transaction;
 
 	public class SvcAutoWithTransactions
@@ -18,8 +20,11 @@ namespace Castle.NHibIntegration.Tests.Comps
 			using (var sess = _sessionManager.OpenSession())
 			{
 				Child1();
+				
+				Thread.Sleep(1000);
 
 				var isOpen = sess.IsOpen;
+				isOpen.Should().BeTrue();
 			}
 		}
 
@@ -30,7 +35,10 @@ namespace Castle.NHibIntegration.Tests.Comps
 			{
 				Child1();
 
+				Thread.Sleep(1000);
+
 				var isOpen = sess.IsOpen;
+				isOpen.Should().BeTrue();
 			}
 		}
 

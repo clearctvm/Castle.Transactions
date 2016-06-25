@@ -6,9 +6,10 @@
 
 		Activity2 EnsureActivityExists();
 		
-//		Activity2 StackNewActivity();
-
 		void NotifyPop(Activity2 activity2);
+
+		void Dispose();
 		
+		void Detach(Activity2 activity2);
 	}
 }

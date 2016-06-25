@@ -56,7 +56,7 @@
 //			var activity = _activityManager.EnsureActivityExists();
 			var activityCount = activity.Count;
 
-			TransactionImpl2 tx;
+			TransactionImpl2 tx; 
 			if (activityCount == 0) // root transaction
 			{
 				var inner = new CommittableTransaction(new System.Transactions.TransactionOptions

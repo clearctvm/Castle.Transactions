@@ -93,6 +93,16 @@ namespace Castle.Services.Transaction2.Tests
 
 			await tplFriendlyClass.CallWithAsyncReusingThread();
 		}
+
+		//CallWithDetach
+
+		[Test]
+		public async Task CallWithDetach()
+		{
+			var tplFriendlyClass = new TplFriendlyClass2(_manager);
+
+			await tplFriendlyClass.CallWithDetach();
+		}
 	}
 
 	[TestFixture]

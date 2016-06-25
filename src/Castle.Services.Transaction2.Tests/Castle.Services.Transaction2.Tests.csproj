@@ -69,6 +69,7 @@
     <Compile Include="Comps\Components.cs" />
     <Compile Include="Comps\EnlistedConfirmation.cs" />
     <Compile Include="TplFriendlyClass.cs" />
+    <Compile Include="TplFriendlyClass2.cs" />
     <Compile Include="TransactionManager2TestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactionScopesWithActionBlockExperimentTestCase.cs" />

@@ -5,26 +5,6 @@ namespace Castle.Services.Transaction2.Tests
 	using FluentAssertions;
 	using Transaction.Internal;
 
-	class TplFriendlyClass2
-	{
-		private readonly IActivityManager2 _manager;
-
-		public TplFriendlyClass2(IActivityManager2 manager)
-		{
-			_manager = manager;
-		}
-
-		public async Task CallChainWithPop()
-		{
-			await FakeTransactionalCall();
-		}
-
-		private Task FakeTransactionalCall()
-		{
-			return null;
-		}
-	}
-
 	class TplFriendlyClass
 	{
 		private readonly IActivityManager2 _manager;

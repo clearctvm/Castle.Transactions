@@ -2,7 +2,7 @@ namespace Castle.Services.Transaction.Internal
 {
 	using System;
 	using System.Collections.Concurrent;
-	using System.Linq;
+	using System.Diagnostics;
 	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
 	using Core.Logging;
@@ -19,8 +19,8 @@ namespace Castle.Services.Transaction.Internal
 
 		public CallCtxActivityManager2() : this(new ConsoleLogger(LoggerLevel.Debug))
 		{
-			
 		}
+
 		public CallCtxActivityManager2(ILogger logger)
 		{
 			_logger = logger;
@@ -50,7 +50,7 @@ namespace Castle.Services.Transaction.Internal
 			{
 				var msg = "TryGetCurrentActivity: got an Activity already disposed! " + activity;
 				this._logger.Fatal(msg);
-				throw new Exception(msg);
+				// throw new Exception(msg);
 			}
 			return current != null;
 		}
@@ -75,10 +75,10 @@ namespace Castle.Services.Transaction.Internal
 
 		public void Detach(Activity2 activity2)
 		{
+			_logger.Info("Detaching : " + activity2);
+
 			// Confirms the context and specified one are the same:
-
 			var current = _contextData.GetCurrent();
-
 			if (current != null && !activity2.Equals(current))
 			{
 				_logger.Fatal("Detach: activity does not match the context one. " +
@@ -123,7 +123,8 @@ namespace Castle.Services.Transaction.Internal
 					// Should never happen!
 					var message = "ContextDataKeeper: TryGetValue returned false for " + currentActivityId;
 					_logger.Fatal(message);
-					throw new Exception(message);
+					// throw new Exception(message);
+					return null;
 				}
 				return activity;
 			}
@@ -136,27 +137,40 @@ namespace Castle.Services.Transaction.Internal
 				
 				if (currentActivityId == null)
 				{
-					var id = Interlocked.Increment(ref _counter);
-					var idAsStr = id.ToString();
+					activity = CreateAndAdd();
 
-					activity = new Activity2(_manager, id, _logger);
-
-					CallContext.LogicalSetData(Key, idAsStr);
-
-					if (!_id2Activity.TryAdd(idAsStr, activity))
-					{
-						// Should never happen!
-						_logger.Fatal("ContextDataKeeper: TryAdd returned false for " + id);
-						throw new Exception("Invalid state - 78");
-					}
+					_logger.Debug("ContextDataKeeper: created activity." + activity._id + " and set key " + CallContext.LogicalGetData(Key));
 				}
 				else
 				{
 					if (!_id2Activity.TryGetValue(currentActivityId, out activity))
 					{
-						_logger.Fatal("ContextDataKeeper: there's a key in the context, but the dict is empty?");
-						throw new Exception("Invalid state - 79");
+						// throw new Exception("Invalid state - 79");
+
+						activity = CreateAndAdd();
+
+						_logger.Fatal("ContextDataKeeper: there's a key in the context [" + 
+							currentActivityId + "], but the dict is empty? Created instead " + activity + " at " + new StackTrace());
 					}
+				}
+
+				return activity;
+			}
+
+			private Activity2 CreateAndAdd()
+			{
+				var id = Interlocked.Increment(ref _counter);
+				var idAsStr = id.ToString();
+
+				var activity = new Activity2(_manager, id, _logger);
+
+				CallContext.LogicalSetData(Key, idAsStr);
+
+				if (!_id2Activity.TryAdd(idAsStr, activity))
+				{
+					// Should never happen!
+					_logger.Fatal("ContextDataKeeper: TryAdd returned false for " + id);
+					throw new Exception("Invalid state - 78");
 				}
 
 				return activity;

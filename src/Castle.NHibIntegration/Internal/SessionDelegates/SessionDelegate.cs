@@ -98,7 +98,7 @@
 		{
 			get
 			{
-				EnsureNotDisposed();
+//				EnsureNotDisposed();
 				return inner.IsOpen;
 			}
 		}

@@ -32,6 +32,8 @@ namespace Castle.NHibIntegration.Internal
 
 		public Guid SessionId { get { return _sessionId; } }
 
+		public bool IsDisposed { get { return _disposed; } }
+		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected void EnsureNotDisposed()
 		{

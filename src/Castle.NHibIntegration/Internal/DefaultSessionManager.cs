@@ -107,7 +107,7 @@
 
 			SessionDelegate wrapped = FindCompatible(alias, currentTransaction, _sessionStore);
 
-			if (wrapped == null) // || (currentTransaction != null && !wrapped.Transaction.IsActive))
+			if (wrapped == null || !wrapped.IsOpen) // || (currentTransaction != null && !wrapped.Transaction.IsActive))
 			{
 				var session = InternalCreateSession(alias);
 

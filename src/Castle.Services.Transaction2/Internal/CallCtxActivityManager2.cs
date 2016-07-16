@@ -75,7 +75,8 @@ namespace Castle.Services.Transaction.Internal
 
 		public void Detach(Activity2 activity2)
 		{
-			_logger.Info("Detaching : " + activity2);
+			if (_logger.IsInfoEnabled)
+				_logger.Info("Detaching : " + activity2);
 
 			// Confirms the context and specified one are the same:
 			var current = _contextData.GetCurrent();
@@ -139,7 +140,8 @@ namespace Castle.Services.Transaction.Internal
 				{
 					activity = CreateAndAdd();
 
-					_logger.Debug("ContextDataKeeper: created activity." + activity._id + " and set key " + CallContext.LogicalGetData(Key));
+					if (_logger.IsDebugEnabled)
+						_logger.Debug("ContextDataKeeper: created activity." + activity._id + " and set key " + CallContext.LogicalGetData(Key));
 				}
 				else
 				{
@@ -195,7 +197,8 @@ namespace Castle.Services.Transaction.Internal
 				Activity2 existing;
 				if (!_id2Activity.TryRemove(activity2._id.ToString(), out existing))
 				{
-					_logger.Warn("Free: dict said no entry for _id found " + activity2);
+					if (_logger.IsWarnEnabled)
+						_logger.Warn("Free: dict said no entry for _id found " + activity2);
 				}
 			}
 

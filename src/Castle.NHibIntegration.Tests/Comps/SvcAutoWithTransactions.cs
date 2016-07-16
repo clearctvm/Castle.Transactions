@@ -23,6 +23,8 @@ namespace Castle.NHibIntegration.Tests.Comps
 				
 				Thread.Sleep(1000);
 
+				var sess2 = _sessionManager.OpenSession();
+
 				var isOpen = sess.IsOpen;
 				isOpen.Should().BeTrue();
 			}

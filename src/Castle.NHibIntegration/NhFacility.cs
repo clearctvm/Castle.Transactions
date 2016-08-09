@@ -25,11 +25,15 @@
 		{
 			this.configurationBuilder = configurationBuilder;
 			facilitySettingConfig = new NhFacilityConfiguration(configurationBuilder);
+
+			WithLeakTracker = true;
 		}
 
 		public NhFacility() : this(new DefaultConfigurationBuilder())
 		{
 		}
+
+		public bool WithLeakTracker { get; set; }
 
 		protected override void Init()
 		{
@@ -52,6 +56,9 @@
 					.Named("autoclosesess.metaInfoStore")
 					.LifeStyle.Singleton
 				);
+
+			if (WithLeakTracker)
+				Kernel.Register(Component.For<LeakTracker>());
 
 			Kernel.ComponentModelBuilder.AddContributor(new SessionAttributeComponentInspector());
 		}

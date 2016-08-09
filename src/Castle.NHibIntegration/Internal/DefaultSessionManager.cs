@@ -26,7 +26,9 @@
 
 			Logger = NullLogger.Instance;
 		}
-		
+
+		public LeakTracker Tracker { get; set; }
+
 		/// <summary>
 		/// The flushmode the created session gets
 		/// </summary>
@@ -99,9 +101,9 @@
 
 			if (currentTransaction == null)
 			{
-				if (this.Logger.IsDebugEnabled)
+//				if (this.Logger.IsDebugEnabled)
 				{
-					this.Logger.Debug("OpenSession with null transaction at " + new StackTrace());
+					this.Logger.Warn("OpenSession with null transaction at " + new StackTrace());
 				}
 			}
 
@@ -110,6 +112,9 @@
 			if (wrapped == null || !wrapped.IsOpen) // || (currentTransaction != null && !wrapped.Transaction.IsActive))
 			{
 				var session = InternalCreateSession(alias);
+
+				if (this.Tracker != null)
+					this.Tracker.Started(session, alias, wrapped);
 
 				var newWrapped = WrapSession(alias, session, currentTransaction, canClose: currentTransaction == null);
 				EnlistIfNecessary(currentTransaction, newWrapped, weAreSessionOwner: true);
@@ -207,7 +212,7 @@
 											ITransaction2 currentTransaction, 
 											bool canClose)
 		{
-			var sessdelegate = new SessionDelegate(alias, canClose, session, _sessionStore, this.Logger.CreateChildLogger("Session"));
+			var sessdelegate = new SessionDelegate(alias, canClose, session, _sessionStore, this.Logger.CreateChildLogger("Session"), this.Tracker);
 
 			if (currentTransaction != null)
 			{

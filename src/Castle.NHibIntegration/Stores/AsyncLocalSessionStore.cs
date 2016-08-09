@@ -8,7 +8,7 @@
 	using System.Text;
 	using System.Threading;
 	using Core.Logging;
-	using Internal;
+
 
 	public class AsyncLocalSessionStore : ISessionStore
 	{
@@ -144,69 +144,68 @@
 			return _localStatelessSession.Value;
 		}
 
-
 		// temp
-		private void OnChanged(AsyncLocalValueChangedArgs<Dictionary<string, SessionDelegate>> arg)
-		{
-			if (this.Logger.IsDebugEnabled &&
-				((arg.CurrentValue != null && arg.CurrentValue.Count != 0) ||
-				(arg.PreviousValue != null && arg.PreviousValue.Count != 0)))
-			{
-				this.Logger.Debug("Context changed for session: Thread changed: " + arg.ThreadContextChanged +
-					" Cur " + DumpDict(arg.CurrentValue) +
-					" Prev " + DumpDict(arg.PreviousValue) +
-					" at " + new StackTrace());
-			}
-		}
-
-		// temp
-		private void OnStatelessChanged(AsyncLocalValueChangedArgs<Dictionary<string, StatelessSessionDelegate>> arg)
-		{
-			if (this.Logger.IsDebugEnabled &&
-				((arg.CurrentValue != null && arg.CurrentValue.Count != 0) ||
-				(arg.PreviousValue != null && arg.PreviousValue.Count != 0)))
-			{
-				this.Logger.Debug("Context changed for stateless session: Thread changed: " + arg.ThreadContextChanged +
-					" Cur " + DumpDict(arg.CurrentValue) +
-					" Prev " + DumpDict(arg.PreviousValue) +
-					" at " + new StackTrace());
-			}
-		}
-
-		// temp
-		private static string DumpDict(Dictionary<string, SessionDelegate> val)
-		{
-			if (val == null || val.Count == 0) return "[Null or Empty dict]";
-
-			var sb = new StringBuilder();
-			sb.Append("[ ");
-			foreach (var sessionDelegate in val)
-			{
-				sb.Append("(")
-				  .Append(sessionDelegate.Value.SessionId)
-				  .Append(") ");
-			}
-			sb.Append(" }");
-
-			return sb.ToString();
-		}
-
-		// temp
-		private static string DumpDict(Dictionary<string, StatelessSessionDelegate> val)
-		{
-			if (val == null || val.Count == 0) return "[Null or Empty dict]";
-
-			var sb = new StringBuilder();
-			sb.Append("[ ");
-			foreach (var sessionDelegate in val)
-			{
-				sb.Append("(")
-				  .Append(sessionDelegate.Value.SessionId)
-				  .Append(") ");
-			}
-			sb.Append(" }");
-
-			return sb.ToString();
-		}
+//		private void OnChanged(AsyncLocalValueChangedArgs<Dictionary<string, SessionDelegate>> arg)
+//		{
+//			if (this.Logger.IsDebugEnabled &&
+//				((arg.CurrentValue != null && arg.CurrentValue.Count != 0) ||
+//				(arg.PreviousValue != null && arg.PreviousValue.Count != 0)))
+//			{
+//				this.Logger.Debug("Context changed for session: Thread changed: " + arg.ThreadContextChanged +
+//					" Cur " + DumpDict(arg.CurrentValue) +
+//					" Prev " + DumpDict(arg.PreviousValue) +
+//					" at " + new StackTrace());
+//			}
+//		}
+//
+//		// temp
+//		private void OnStatelessChanged(AsyncLocalValueChangedArgs<Dictionary<string, StatelessSessionDelegate>> arg)
+//		{
+//			if (this.Logger.IsDebugEnabled &&
+//				((arg.CurrentValue != null && arg.CurrentValue.Count != 0) ||
+//				(arg.PreviousValue != null && arg.PreviousValue.Count != 0)))
+//			{
+//				this.Logger.Debug("Context changed for stateless session: Thread changed: " + arg.ThreadContextChanged +
+//					" Cur " + DumpDict(arg.CurrentValue) +
+//					" Prev " + DumpDict(arg.PreviousValue) +
+//					" at " + new StackTrace());
+//			}
+//		}
+//
+//		// temp
+//		private static string DumpDict(Dictionary<string, SessionDelegate> val)
+//		{
+//			if (val == null || val.Count == 0) return "[Null or Empty dict]";
+//
+//			var sb = new StringBuilder();
+//			sb.Append("[ ");
+//			foreach (var sessionDelegate in val)
+//			{
+//				sb.Append("(")
+//				  .Append(sessionDelegate.Value.SessionId)
+//				  .Append(") ");
+//			}
+//			sb.Append(" }");
+//
+//			return sb.ToString();
+//		}
+//
+//		// temp
+//		private static string DumpDict(Dictionary<string, StatelessSessionDelegate> val)
+//		{
+//			if (val == null || val.Count == 0) return "[Null or Empty dict]";
+//
+//			var sb = new StringBuilder();
+//			sb.Append("[ ");
+//			foreach (var sessionDelegate in val)
+//			{
+//				sb.Append("(")
+//				  .Append(sessionDelegate.Value.SessionId)
+//				  .Append(") ");
+//			}
+//			sb.Append(" }");
+//
+//			return sb.ToString();
+//		}
 	}
 }

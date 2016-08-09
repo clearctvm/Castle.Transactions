@@ -19,6 +19,7 @@
 	public class SessionDelegate : BaseSessionDelegate, ISession
 	{
 		private readonly ISession inner;
+		private readonly LeakTracker _leakTracker;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SessionDelegate"/> class.
@@ -27,10 +28,11 @@
 		/// <param name="inner">The inner.</param>
 		/// <param name="sessionStore">The session store.</param>
 		/// <param name="logger"></param>
-		public SessionDelegate(string @alias, bool canClose, ISession inner, ISessionStore sessionStore, ILogger logger) :
+		public SessionDelegate(string @alias, bool canClose, ISession inner, ISessionStore sessionStore, ILogger logger, LeakTracker leakTracker) :
 			base(alias, canClose, inner.GetSessionImplementation().SessionId, sessionStore, logger)
 		{
 			this.inner = inner;
+			_leakTracker = leakTracker;
 		}
 
 		/// <summary>
@@ -1400,6 +1402,9 @@
 
 		protected override void InnerDispose()
 		{
+			if (_leakTracker != null)
+				_leakTracker.Remove(this.inner);
+
 			this.inner.Dispose();
 		}
 

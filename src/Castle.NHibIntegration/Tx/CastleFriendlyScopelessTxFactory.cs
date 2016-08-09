@@ -5,7 +5,6 @@
 	using System.Collections.Generic;
 	using System.Data;
 	using System.Data.Common;
-	using System.Diagnostics;
 	using System.Transactions;
 	using NHibernate;
 	using NHibernate.Engine;
@@ -13,6 +12,9 @@
 	using NHibernate.Exceptions;
 	using NHibernate.Impl;
 	using NHibernate.Transaction;
+	using StatsdClient;
+	using StatsdClient.Configuration;
+	using Stopwatch = System.Diagnostics.Stopwatch;
 
 
 	public class CastleFriendlyScopelessTxFactory : ITransactionFactory
@@ -189,6 +191,8 @@
 
 					Done(enlistment);
 				}
+
+				Metrics.Counter(Naming.withEnvironmentApplicationAndHostname("nhibernate.tx.commit"));
 			}
 
 			private void Done(Enlistment enlistment)
@@ -214,6 +218,8 @@
 
 					Done(enlistment);
 				}
+
+				Metrics.Counter(Naming.withEnvironmentApplicationAndHostname("nhibernate.tx.rollback"));
 			}
 
 			void IEnlistmentNotification.InDoubt(Enlistment enlistment)
@@ -235,7 +241,7 @@
 			{
 				stopwatch.Stop();
 
-				// new MetricsTimer(Naming.withEnvironmentApplicationAndHostname("nhibernate.tx.flush"), payload: stopwatch.ElapsedMilliseconds()).Dispose();
+				Metrics.Timer(Naming.withEnvironmentApplicationAndHostname("nhibernate.tx.flush"), (int) stopwatch.ElapsedMilliseconds);
 			}
 
 			void End(bool wasSuccessful)

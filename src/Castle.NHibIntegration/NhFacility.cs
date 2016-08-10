@@ -26,7 +26,7 @@
 			this.configurationBuilder = configurationBuilder;
 			facilitySettingConfig = new NhFacilityConfiguration(configurationBuilder);
 
-			WithLeakTracker = true;
+//			WithLeakTracker = true;
 		}
 
 		public NhFacility() : this(new DefaultConfigurationBuilder())

@@ -268,6 +268,12 @@
 			return this;
 		}
 
+		public NhFacility IsHybrid()
+		{
+			facilitySettingConfig.IsHybrid();
+			return this;
+		}
+
 		public NhFacility SessionStore(Type type)
 		{
 			facilitySettingConfig.SessionStore(type);

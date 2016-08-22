@@ -73,7 +73,7 @@ namespace Castle.Services.Transaction.Internal
 
 		public void Detach(Activity2 activity2)
 		{
-			_logger.Fatal("Detaching : " + activity2);
+			// _logger.Fatal("Detaching : " + activity2);
 
 			// Confirms the context and specified one are the same:
 

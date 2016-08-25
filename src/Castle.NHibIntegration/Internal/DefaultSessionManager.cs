@@ -99,14 +99,17 @@
 
 			ITransaction2 currentTransaction = _transactionManager.CurrentTransaction;
 
+#if DEBUG
+			//NOTE: High memory pression in production envs.
+
 			if (currentTransaction == null)
 			{
-//				if (this.Logger.IsDebugEnabled)
+				if (this.Logger.IsDebugEnabled)
 				{
-					this.Logger.Warn("OpenSession with null transaction at " + new StackTrace());
+					this.Logger.Warn("OpenSession with null transaction at " + new StackTrace()); 
 				}
 			}
-
+#endif
 			SessionDelegate wrapped = FindCompatible(alias, currentTransaction, _sessionStore);
 
 			if (wrapped == null || !wrapped.IsOpen) // || (currentTransaction != null && !wrapped.Transaction.IsActive))

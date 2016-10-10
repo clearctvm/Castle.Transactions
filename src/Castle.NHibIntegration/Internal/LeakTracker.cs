@@ -7,6 +7,8 @@ namespace Castle.NHibIntegration.Internal
 	using System.Threading;
 	using Core.Logging;
 	using NHibernate;
+	using StatsdClient;
+	using StatsdClient.Configuration;
 
 	public class LeakTracker
 	{
@@ -55,8 +57,15 @@ namespace Castle.NHibIntegration.Internal
 
 			Interlocked.Increment(ref _counter);
 
-			_weakTable.Add(session, new CreationInfo {  Created = DateTime.Now, Source = new StackTrace() });
-			_sessions.Add(new WeakReference<ISession>(session, trackResurrection: false));
+#if DEBUG
+			_weakTable.Add(session, new CreationInfo {  Created = DateTime.Now, Source = new StackTrace(), ThreadName = System.Threading.Thread.CurrentThread.Name });
+#else
+			_weakTable.Add(session, new CreationInfo {  Created = DateTime.Now, ThreadName = System.Threading.Thread.CurrentThread.Name });
+#endif
+			lock (_sessions)
+				_sessions.Add(new WeakReference<ISession>(session, trackResurrection: false));
+
+			Metrics.Gauge(Naming.withEnvironmentApplicationAndHostname("nhibernate.sessions.active"), _counter);
 		}
 
 		public void Remove(ISession session)
@@ -77,6 +86,8 @@ namespace Castle.NHibIntegration.Internal
 					break;
 				}
 			}
+
+			Metrics.Gauge(Naming.withEnvironmentApplicationAndHostname("nhibernate.sessions.active"), _counter);
 		}
 
 		private void RemoveAllNulls()
@@ -97,7 +108,23 @@ namespace Castle.NHibIntegration.Internal
 		class CreationInfo
 		{
 			public DateTime Created;
+
 			public StackTrace Source;
+
+			public string ThreadName { get; set; }
+		}
+
+		public void Reused(ISession innerSession, string @alias, SessionDelegate wrapped)
+		{
+			CreationInfo info;
+			if (_weakTable.TryGetValue(innerSession, out info))
+			{
+				var tname = Thread.CurrentThread.Name;
+
+				if (info.ThreadName != tname)
+					Logger.WarnFormat("Session shared between threads. Session = [{SessionId}, {CreatorThread}, {CurrentThread}]", 
+						innerSession.GetSessionImplementation().SessionId, info.ThreadName, tname);
+			}
 		}
 	}
 }

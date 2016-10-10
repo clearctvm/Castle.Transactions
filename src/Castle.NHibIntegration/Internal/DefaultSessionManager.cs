@@ -116,8 +116,7 @@
 			{
 				var session = InternalCreateSession(alias);
 
-				if (this.Tracker != null)
-					this.Tracker.Started(session, alias, wrapped);
+				Tracker?.Started(session, alias, wrapped);
 
 				var newWrapped = WrapSession(alias, session, currentTransaction, canClose: currentTransaction == null);
 				EnlistIfNecessary(currentTransaction, newWrapped, weAreSessionOwner: true);
@@ -136,6 +135,8 @@
 
 				wrapped = WrapSession(alias, wrapped.InnerSession, null, canClose: false);
 				// EnlistIfNecessary(currentTransaction, wrapped, weAreSessionOwner: false);
+
+				Tracker?.Reused(wrapped.InnerSession, alias, wrapped);
 			}
 
 			return wrapped;

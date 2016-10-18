@@ -81,7 +81,6 @@
 		{
 			if (_logger.IsDebugEnabled) _logger.Debug("async case");
 
-			var capture = Zipkin.TraceContextPropagation.CaptureCurrentTrace();
 			var trace = new Zipkin.LocalTrace("tx");
 
 			try
@@ -93,7 +92,7 @@
 				if (ret == null)
 					throw new Exception("Async method returned null instead of Task - bad programmer somewhere");
 
-				SafeHandleAsyncCompletion(ret, transaction, ref capture, ref trace);
+				SafeHandleAsyncCompletion(ret, transaction, trace);
 			}
 			catch (Exception e)
 			{
@@ -111,7 +110,7 @@
 			}
 		}
 
-		private void SafeHandleAsyncCompletion(Task ret, ITransaction2 transaction, ref TraceInfo capture, ref LocalTrace trace)
+		private void SafeHandleAsyncCompletion(Task ret, ITransaction2 transaction, LocalTrace trace)
 		{
 			if (!ret.IsCompleted)
 			{
@@ -120,13 +119,12 @@
 
 				transaction.DetachContext();
 
-
 				ret.ContinueWith((t, tupleArg) =>
 				{
-					// var tran = (ITransaction2) aTransaction;
-					var tuple = (Tuple<ITransaction2, ILogger>) tupleArg;
+					var tuple = (Tuple<ITransaction2, ILogger, LocalTrace>) tupleArg;
 					var tran = tuple.Item1;
 					var logger = tuple.Item2;
+					var trace2 = tuple.Item3;
 
 					try
 					{
@@ -155,12 +153,18 @@
 							}
 						}
 					}
+					catch (Exception e)
+					{
+						trace2.AnnotateWith(PredefinedTag.Error, e.Message);
+						throw;
+					}
 					finally
 					{
 						tran.Dispose();
+						trace2.Dispose();
 					}
 
-				}, Tuple.Create(transaction, _logger), TaskContinuationOptions.ExecuteSynchronously);
+				}, Tuple.Create(transaction, _logger, trace), TaskContinuationOptions.ExecuteSynchronously);
 			}
 			else
 			{
@@ -179,14 +183,21 @@
 
 						if (_logger.IsWarnEnabled)
 						{
-							_logger.WarnFormat("transaction was in state {0}, so it cannot be completed. the 'consumer' method, so to speak, might have rolled it back.",
-							transaction.State);
+							_logger.WarnFormat(
+								"transaction was in state {0}, so it cannot be completed. the 'consumer' method, so to speak, might have rolled it back.",
+								transaction.State);
 						}
 					}
+				}
+				catch (Exception e)
+				{
+					trace.AnnotateWith(PredefinedTag.Error, e.Message);
+					throw;
 				}
 				finally
 				{
 					transaction.Dispose();
+					trace.Dispose();
 				}
 			}
 		}
@@ -205,15 +216,15 @@
 			{
 				invocation.Proceed();
 
-				if (transaction.State == TransactionState.Active)
+//				if (transaction.State == TransactionState.Active)
 				{
 					transaction.Complete();
-					transaction.Dispose();
+//					transaction.Dispose();
 				}
-				else if (_logger.IsWarnEnabled)
-					_logger.WarnFormat(
-						"transaction was in state {0}, so it cannot be completed. the 'consumer' method, so to speak, might have rolled it back.",
-						transaction.State);
+//				else if (_logger.IsWarnEnabled)
+//					_logger.WarnFormat(
+//						"transaction was in state {0}, so it cannot be completed. the 'consumer' method, so to speak, might have rolled it back.",
+//						transaction.State);
 			}
 			catch (Exception ex)
 			{

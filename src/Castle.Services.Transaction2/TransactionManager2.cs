@@ -25,6 +25,11 @@
 			set { _logger = value; }
 		}
 
+		public bool HasTransaction
+		{
+			get { return _activityManager.HasActivityWithTransaction; }
+		}
+
 		public ITransaction2 CurrentTransaction
 		{
 			get
@@ -40,20 +45,11 @@
 
 		public ITransaction2 CreateTransaction(TransactionOptions transactionOptions)
 		{
-//			Activity2 existingActivity;
-//			var hasContextActivity = _activityManager.TryGetCurrentActivity(out existingActivity);
-
 			Activity2 activity;
-//			if (transactionOptions.Mode == TransactionScopeOption.RequiresNew && hasContextActivity)
-//			{
-//				activity = _activityManager.StackNewActivity();
-//			}
-//			else
 			{
 				activity = _activityManager.EnsureActivityExists();
 			}
 
-//			var activity = _activityManager.EnsureActivityExists();
 			var activityCount = activity.Count;
 
 			TransactionImpl2 tx; 
@@ -67,7 +63,7 @@
 
 				var txScope = new TransactionScope(inner, TransactionScopeAsyncFlowOption.Enabled);
 
-				tx = new TransactionImpl2(inner, txScope, activity, _logger.CreateChildLogger("TransactionRoot"));
+				tx = new TransactionImpl2(inner, txScope, activity);
 
 				FireNewTransactionCreated(tx);
 			}

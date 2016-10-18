@@ -11,5 +11,7 @@
 		void Dispose();
 		
 		void Detach(Activity2 activity2);
+
+		bool HasActivityWithTransaction { get;  }
 	}
 }

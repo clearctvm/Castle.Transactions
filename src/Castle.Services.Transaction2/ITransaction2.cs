@@ -14,6 +14,8 @@
 
 		System.Transactions.Transaction Inner { get; }
 
+		bool HasUserData { get; }
+
 		IDictionary<string, object> UserData { get; }
 
 		void Rollback();

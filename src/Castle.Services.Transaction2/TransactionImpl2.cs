@@ -16,24 +16,23 @@ namespace Castle.Services.Transaction
 		private readonly Activity2 _parentActivity;
 		private readonly string _localIdentifier;
 		private readonly Lazy<IDictionary<string, object>> _lazyUserData;
-		private readonly ILogger _logger;
-		private volatile bool _disposed;
+//		private readonly ILogger _logger;
+		private int _disposed;
 		private bool? _shouldCommit;
 
 		public TransactionImpl2(System.Transactions.CommittableTransaction transaction, 
-			System.Transactions.TransactionScope txScope, 
-			Activity2 parentActivity, 
-			ILogger logger)
+								System.Transactions.TransactionScope txScope, 
+								Activity2 parentActivity)
 		{
 			_transaction = transaction;
 			_txScope = txScope;
 			_parentActivity = parentActivity;
-			_logger = logger;
+//			_logger = logger;
 			_localIdentifier = transaction.TransactionInformation.LocalIdentifier;
 
 			_currentState = TransactionState.Active;
 
-			_lazyUserData = new Lazy<IDictionary<string, object>>(() => new Dictionary<string, object>(StringComparer.Ordinal));
+			_lazyUserData = new Lazy<IDictionary<string, object>>(() => new Dictionary<string, object>(StringComparer.Ordinal), LazyThreadSafetyMode.ExecutionAndPublication);
 
 			_parentActivity.Push(this);
 		}
@@ -42,6 +41,7 @@ namespace Castle.Services.Transaction
 		public string LocalIdentifier { get { return _localIdentifier; } }
 		public TransactionState State { get { return _currentState; } }
 		public IDictionary<string, object> UserData { get { return _lazyUserData.Value; } }
+		public bool HasUserData { get { return _lazyUserData.IsValueCreated; } }
 
 		public TransactionStatus? Status
 		{
@@ -54,7 +54,7 @@ namespace Castle.Services.Transaction
 		
 		public void Rollback()
 		{
-			if (_disposed) throw new ObjectDisposedException("Can't Rollback(). Transaction2 disposed");
+			if (_disposed == 1) throw new ObjectDisposedException("Can't Rollback(). Transaction2 disposed");
 
 			// InternalRollback();
 
@@ -65,7 +65,7 @@ namespace Castle.Services.Transaction
 
 		public void Complete()
 		{
-			if (_disposed) throw new ObjectDisposedException("Can't Complete(). Transaction2 disposed");
+			if (_disposed == 1) throw new ObjectDisposedException("Can't Complete(). Transaction2 disposed");
 
 //			InternalComplete();
 			
@@ -79,9 +79,8 @@ namespace Castle.Services.Transaction
 
 		public void Dispose()
 		{
-			if (_disposed) return;
-			Thread.MemoryBarrier();
-			_disposed = true;
+			if (Interlocked.CompareExchange(ref _disposed, 1, 0) != 0)
+				return;
 
 			// shouldCommit when wasn't explicit set or was set to true
 			var shouldCommit = !_shouldCommit.HasValue || _shouldCommit.Value == true;
@@ -132,87 +131,5 @@ namespace Castle.Services.Transaction
 		{
 			return string.Equals(_localIdentifier, other._localIdentifier);
 		}
-
-//		private void InternalRollback()
-//		{
-//			if (_currentState != TransactionState.Active) throw new InvalidOperationException("Transaction has to be in Active state to Rollback");
-//
-//			try
-//			{
-//				if (_logger.IsInfoEnabled)
-//					_logger.Info("Rolling back tx#" + _localIdentifier);
-//
-//				_transaction.Rollback();
-//
-//				if (_logger.IsInfoEnabled)
-//					_logger.Info("Rolled back tx#" + _localIdentifier);
-//			}
-//			catch (TransactionInDoubtException ex)
-//			{
-//				_logger.Fatal("Transaction Rollback failed due to InDoubt state. tx#" + _localIdentifier, ex);
-//
-//				throw;
-//			}
-//			catch (TransactionAbortedException ex)
-//			{
-//				_logger.Fatal("Transaction Rollback failed due to Aborted state. tx#" + _localIdentifier, ex);
-//
-//				throw;
-//			}
-//			catch (Exception ex)
-//			{
-//				_logger.Fatal("Transaction Rollback failed. tx#" + _localIdentifier, ex);
-//
-//				throw;
-//			}
-//			finally
-//			{
-//				_currentState = TransactionState.Aborted;
-//			}
-//		}
-//
-//		private void InternalComplete()
-//		{
-//			if (_currentState != TransactionState.Active) throw new InvalidOperationException("Transaction has to be in Active state to Complete");
-//
-//			try
-//			{
-//				if (_logger.IsInfoEnabled)
-//					_logger.Info("Committing tx#" + _localIdentifier);
-//
-//				_transaction.Commit();
-//
-//				_currentState = TransactionState.CommittedOrCompleted;
-//
-//				if (_logger.IsInfoEnabled)
-//					_logger.Info("Committed tx#" + _localIdentifier);
-//			}
-//			catch (TransactionInDoubtException ex)
-//			{
-//				_currentState = TransactionState.InDoubt;
-//
-//				_logger.Fatal("Transaction Commit failed due to InDoubt state. tx#" + _localIdentifier, ex);
-//
-//				throw;
-//			}
-//			catch (TransactionAbortedException ex)
-//			{
-//				_currentState = TransactionState.Aborted;
-//
-//				_logger.Fatal("Transaction Commit failed due to Aborted state. tx#" + _localIdentifier, ex);
-//
-//				throw;
-//			}
-//			catch (Exception ex)
-//			{
-//				InternalRollback();
-//
-//				_currentState = TransactionState.Aborted;
-//
-//				_logger.Fatal("Transaction Complete failed. tx#" + _localIdentifier, ex);
-//
-//				throw;
-//			}
-//		}
 	}
 }

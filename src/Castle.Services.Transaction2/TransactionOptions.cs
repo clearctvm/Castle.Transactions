@@ -3,7 +3,7 @@
 	using System;
 	using System.Transactions;
 
-	public class TransactionOptions
+	public struct TransactionOptions
 	{
 		public static readonly TransactionOptions RequiresNewReadCommitted = new TransactionOptions
 		{

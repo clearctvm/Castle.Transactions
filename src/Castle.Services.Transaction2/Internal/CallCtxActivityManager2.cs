@@ -55,6 +55,19 @@ namespace Castle.Services.Transaction.Internal
 			return current != null;
 		}
 
+		public bool HasActivityWithTransaction
+		{
+			get
+			{
+				Activity2 activity;
+				if (TryGetCurrentActivity(out activity))
+				{
+					return activity.CurrentTransaction != null;
+				}
+				return false;
+			}
+		}
+
 		public void NotifyPop(Activity2 activity2)
 		{
 			if (activity2.IsEmpty) // last pop

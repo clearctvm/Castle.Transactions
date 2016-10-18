@@ -8,15 +8,15 @@
 
 	public sealed class TransactionalClassMetaInfo
 	{
-		private readonly Dictionary<string, TransactionOptions> _method2TransactionOpts;
+		private readonly Dictionary<RuntimeMethodHandle, TransactionOptions> _method2TransactionOpts;
 
 		public TransactionalClassMetaInfo(IList<Tuple<MethodInfo, TransactionOptions>> methods)
 		{
-			_method2TransactionOpts = new Dictionary<string, TransactionOptions>(StringComparer.Ordinal);
+			_method2TransactionOpts = new Dictionary<RuntimeMethodHandle, TransactionOptions>();
 
 			foreach (var tuple in methods)
 			{
-				_method2TransactionOpts[tuple.Item1.Name] = tuple.Item2;
+				_method2TransactionOpts[tuple.Item1.MethodHandle] = tuple.Item2;
 			}
 		}
 
@@ -26,11 +26,12 @@
 		/// </summary>
 		/// <param name = "target">Method to find the options for.</param>
 		/// <returns>A non-null maybe <see cref = "ITransactionOptions" />.</returns>
-		public TransactionOptions AsTransactional(MethodInfo target)
+		public TransactionOptions? AsTransactional(MethodInfo target)
 		{
 			TransactionOptions att;
-			_method2TransactionOpts.TryGetValue(target.Name, out att);
-			return att;
+			if (_method2TransactionOpts.TryGetValue(target.MethodHandle, out att))
+				return att;
+			return null;
 		}
 	}
 }

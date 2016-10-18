@@ -16,7 +16,20 @@ namespace Castle.Services.Transaction.Internal
 		{
 			_holder = new AsyncLocal<Activity2>( /*OnValueChanged*/ );
 		}
-		
+
+		public bool HasActivityWithTransaction
+		{
+			get
+			{
+				Activity2 activity;
+				if (TryGetCurrentActivity(out activity))
+				{
+					return activity.CurrentTransaction != null;
+				}
+				return false;
+			}
+		}
+
 		// Invoked by the activy itself after popping a transaction
 		public void NotifyPop(Activity2 activity2)
 		{

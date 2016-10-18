@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Threading;
 	using Core.Logging;
@@ -13,7 +14,7 @@
 		private readonly IActivityManager2 _manager;
 		internal readonly int _id;
 		private readonly ILogger _logger;
-		private ConcurrentStack<ITransaction2> _stack;
+		private Stack<ITransaction2> _stack;
 		private volatile bool _disposed;
 
 		public Activity2(IActivityManager2 manager, int id, ILogger logger)
@@ -21,7 +22,7 @@
 			_manager = manager;
 			_id = id;
 			_logger = logger;
-			_stack = new ConcurrentStack<ITransaction2>();
+			_stack = new Stack<ITransaction2>();
 		}
 
 		public bool IsDisposed { get { return _disposed; } }
@@ -30,12 +31,10 @@
 		{
 			get
 			{
-				ITransaction2 peeked;
-				while(!_stack.IsEmpty)
-					if (_stack.TryPeek(out peeked))
-					{
-						return peeked;
-					}
+				while(_stack.Count != 0)
+				{
+					return _stack.Peek();
+				}
 				return null;
 			}
 		}
@@ -47,7 +46,7 @@
 
 		public bool IsEmpty
 		{
-			get { return _stack.IsEmpty; }
+			get { return _stack.Count == 0; }
 		}
 
 		public void Detach()
@@ -71,11 +70,12 @@
 		{
 			if (_disposed) throw new ObjectDisposedException("Activity2");
 
-			tryAgain:
+//			tryAgain:
 
-			ITransaction2 result;
-			if (_stack.TryPop(out result))
+//			ITransaction2 result = _stack.Pop();
+			if (_stack.Count != 0)
 			{
+				ITransaction2 result = _stack.Pop();
 				// confirm it's the expected one
 				if (!transaction.Equals(result))
 				{
@@ -87,7 +87,8 @@
 					throw new Exception(msg);
 				}
 			}
-			else if (_stack.IsEmpty)
+			// else if (_stack.IsEmpty)
+			else
 			{
 				var msg = "Tried to pop transaction from activity, but activity stack was empty.";
 				
@@ -95,10 +96,10 @@
 
 				throw new Exception(msg);
 			}
-			else
-			{
-				goto tryAgain;
-			}
+//			else
+//			{
+//				goto tryAgain;
+//			}
 
 			if (_logger.IsDebugEnabled)
 			{

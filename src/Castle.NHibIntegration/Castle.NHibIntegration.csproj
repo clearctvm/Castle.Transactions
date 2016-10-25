@@ -60,7 +60,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Zipkin, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Zipkin.1.0.5\lib\net461\Zipkin.dll</HintPath>
+      <HintPath>..\..\packages\Zipkin.1.0.9\lib\net461\Zipkin.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

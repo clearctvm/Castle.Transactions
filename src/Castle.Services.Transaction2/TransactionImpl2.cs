@@ -34,7 +34,8 @@ namespace Castle.Services.Transaction
 
 			_lazyUserData = new Lazy<IDictionary<string, object>>(() => new Dictionary<string, object>(StringComparer.Ordinal), LazyThreadSafetyMode.ExecutionAndPublication);
 
-			_parentActivity.Push(this);
+			// _parentActivity.Push(this);
+			_parentActivity.SetTransaction(this);
 		}
 
 		public Transaction Inner { get { return _transaction; } }
@@ -103,7 +104,7 @@ namespace Castle.Services.Transaction
 			}
 			finally
 			{
-				_parentActivity.Pop(this);
+				_parentActivity.UnsetTransaction(this);
 
 				_currentState = TransactionState.Disposed;
 			}

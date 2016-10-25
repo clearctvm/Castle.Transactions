@@ -33,7 +33,7 @@ namespace Castle.Services.Transaction.Internal
 		// Invoked by the activy itself after popping a transaction
 		public void NotifyPop(Activity2 activity2)
 		{
-			if (activity2.IsEmpty)
+			// if (activity2.IsEmpty)
 			{
 				var ctxActivity = _holder.Value;
 				if (ctxActivity != null && !activity2.Equals(ctxActivity))

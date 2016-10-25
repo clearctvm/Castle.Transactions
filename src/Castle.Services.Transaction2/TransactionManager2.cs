@@ -50,10 +50,10 @@
 				activity = _activityManager.EnsureActivityExists();
 			}
 
-			var activityCount = activity.Count;
+			var hasTransaction = activity.CurrentTransaction != null;
 
 			TransactionImpl2 tx; 
-			if (activityCount == 0) // root transaction
+			if (!hasTransaction) // root transaction
 			{
 				var inner = new CommittableTransaction(new System.Transactions.TransactionOptions
 				{
@@ -72,8 +72,8 @@
 				throw new NotSupportedException("nesting transactions isnt supported yet");
 			}
 
-			if (Logger.IsDebugEnabled)
-				Logger.Debug("Created ActivityCount = " + activityCount + ". Tx = " + tx.LocalIdentifier);
+//			if (Logger.IsDebugEnabled)
+//				Logger.Debug("Created ActivityCount = " + activityCount + ". Tx = " + tx.LocalIdentifier);
 
 			return tx;
 		}

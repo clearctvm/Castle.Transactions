@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Threading.Tasks;
+
 namespace Castle.Facilities.AutoTx.Tests
 {
 	using System;
 	using System.Diagnostics.Contracts;
 	using System.Threading;
 
+	using Castle.Facilities.Logging;
+	using Castle.Services.Logging.NLogIntegration;
 	using Castle.Facilities.AutoTx.Testing;
 	using Castle.Facilities.FactorySupport;
 	using Castle.Facilities.TypedFactory;
@@ -44,7 +48,7 @@ namespace Castle.Facilities.AutoTx.Tests
 			using (var scope = container.ResolveScope<Service>())
 			{
 				var ex = Assert.Throws<MissingTransactionException>(() => scope.Service.DoWork());
-				Assert.That(ex.Message, Is.StringContaining("Castle.Facilities.AutoTx.Tests.IPerTxService"),
+				Assert.That(ex.Message, Contains.Substring("Castle.Facilities.AutoTx.Tests.IPerTxService"),
 				            "The message from the exception needs to contain the component which IS A per-transaction component.");
 			}
 		}
@@ -61,7 +65,7 @@ namespace Castle.Facilities.AutoTx.Tests
 				using (var scope = container.ResolveScope<ServiceWithDirectDep>())
 					scope.Service.DoWork();
 			});
-			Assert.That(ex.Message, Is.StringContaining("Castle.Facilities.AutoTx.Tests.IPerTxService"),
+			Assert.That(ex.Message, Contains.Substring("Castle.Facilities.AutoTx.Tests.IPerTxService"),
 			            "The message from the exception needs to contain the component which IS A per-transaction component.");
 		}
 
@@ -113,12 +117,12 @@ namespace Castle.Facilities.AutoTx.Tests
 		}
 
 		[Test]
-		public void Concurrent_DependentTransaction_AndDisposing()
+		public async Task Concurrent_DependentTransaction_AndDisposing()
 		{
 			// given
 			var container = GetContainer();
-			var childStarted = new ManualResetEvent(false);
-			var childComplete = new ManualResetEvent(false);
+			var childStartedTaskCompletition = new TaskCompletionSource<bool>();
+			Task childCompleteTask;
 
 			// exports from actions, to assert end-state
 			IPerTxService serviceUsed;
@@ -138,7 +142,7 @@ namespace Castle.Facilities.AutoTx.Tests
 				Assert.That(createdTx2.ShouldFork, Is.True, "because we're in an ambient and have specified the option");
 				Assert.That(manager.Service.Count, Is.EqualTo(1), "transaction count correct");
 
-				ThreadPool.QueueUserWorkItem(_ =>
+				childCompleteTask = Task.Run(() =>
 				{
 					IPerTxService perTxService;
 
@@ -153,7 +157,7 @@ namespace Castle.Facilities.AutoTx.Tests
 							Assert.That(manager.Service.Count, Is.EqualTo(1), "transaction count correct");
 
 							// tell parent it can go on and complete
-							childStarted.Set();
+							Task.Run(() => childStartedTaskCompletition.SetResult(true));
 
 							Assert.That(perTxService.Disposed, Is.False);
 
@@ -166,15 +170,15 @@ namespace Castle.Facilities.AutoTx.Tests
 					catch (Exception ex)
 					{
 						possibleException = ex;
-						logger.Debug("child fault", ex);
+						logger.Debug(ex, "child fault");
+						childStartedTaskCompletition.SetException(ex);
 					}
 					finally
 					{
 						logger.Debug("child finally");
-						childComplete.Set();
 					}
 				});
-				childStarted.WaitOne();
+				await childStartedTaskCompletition.Task.ConfigureAwait(false);
 
 				serviceUsed = resolved;
 
@@ -187,7 +191,7 @@ namespace Castle.Facilities.AutoTx.Tests
 
 			Assert.That(serviceUsed.Disposed, Is.True);
 
-			childComplete.WaitOne();
+			await childCompleteTask.ConfigureAwait(false);
 
 			// throw any thread exceptions
 			if (possibleException != null)
@@ -228,6 +232,7 @@ Test 'Castle.Facilities.AutoTx.Tests.PerTransactionLifestyle_Releasing.Concurren
 		private WindsorContainer GetContainer()
 		{
 			var container = new WindsorContainer();
+			container.AddFacility<LoggingFacility>(f => f.LogUsing<NLogFactory>().WithConfig("NLog.config"));
 			container.AddFacility<AutoTxFacility>();
 			container.AddFacility<FactorySupportFacility>();
 			container.AddFacility<TypedFactoryFacility>();

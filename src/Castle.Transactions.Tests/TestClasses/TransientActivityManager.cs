@@ -34,5 +34,10 @@ namespace Castle.Transactions.Tests.TestClasses
 		{
 			return activity;
 		}
+
+		public Activity CreateNewActivity()
+		{
+			return activity;
+		}
 	}
 }

@@ -1,19 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CD2EEE95-769C-44A6-98AF-27A03A0F4528}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Castle.Transactions.IO</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Castle.Transactions.IO</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <PackageId>Castle.Transactions.IO</PackageId>
+    <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
     <CodeContractsRuntimeThrowOnFailure>False</CodeContractsRuntimeThrowOnFailure>
@@ -40,98 +33,39 @@
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>2</CodeContractsAnalysisWarningLevel>
     <CodeAnalysisRuleSet>..\..\buildscripts\Correctness-Rules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>False</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>..\..\buildscripts\CastleKey.snk</AssemblyOriginatorKeyFile>
+	<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageOutputPath>..\..\build\</PackageOutputPath>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Version>3.3.0</Version>
+    <Product>Castle Transactions IO</Product>
+    <Authors>Henrik Feldt</Authors>
+    <Company />
+    <Description>Castle Transactions IO</Description>
+    <PackageProjectUrl>https://github.com/castleproject/Castle.Transactions</PackageProjectUrl>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <Copyright>Apache 2.0 Licensed. (c) The Castle Project 2004-2011</Copyright>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Castle.Core">
-      <HintPath>..\..\packages\Castle.Core.3.3.3\lib\net40-client\Castle.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="NLog, Version=3.2.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NLog.3.2.0.0\lib\net40\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="..\TxIOAssemblyInfo.cs">
-      <Link>Properties\TxIOAssemblyInfo.cs</Link>
-    </Compile>
-    <Compile Include="DirectoryAdapter.cs" />
-    <Compile Include="DirectoryAdapterExtensions.cs" />
-    <Compile Include="FileAdapter.cs" />
-    <Compile Include="FileAdapterExtensions.cs" />
-    <Compile Include="FileTransaction.cs" />
-    <Compile Include="FileTransactionAttribute.cs" />
-    <Compile Include="IKernelTransaction.cs" />
-    <Compile Include="Internal\TxFCodes.cs" />
-    <Compile Include="Interop\NativeMethods.cs" />
-    <Compile Include="SafeKernelTransactionHandle.cs" />
-    <Compile Include="Interop\SafeNativeMethods.cs" />
-    <Compile Include="TransactionAdapterBase.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="TransactionalFileSystem.cs" />
-    <Compile Include="TransactionExtensions.cs" />
-    <Compile Include="TransactionManagerExtensions.cs" />
-    <Compile Include="Interop\UnsafeNativeMethods.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Castle.IO\Castle.IO.csproj">
-      <Project>{59637705-C235-488A-876B-E4B1A39E9BF8}</Project>
-      <Name>Castle.IO</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Castle.Transactions\Castle.Transactions.csproj">
-      <Project>{76DF5D09-FC04-411F-B123-01A6B9432796}</Project>
-      <Name>Castle.Transactions</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Contracts\" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="..\..\buildscripts\CastleKey.snk">
       <Link>CastleKey.snk</Link>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.2.1" />
+    <PackageReference Include="NLog" Version="4.5.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Castle.IO\Castle.IO.csproj" />
+    <ProjectReference Include="..\Castle.Transactions\Castle.Transactions.csproj" />
+  </ItemGroup>
 </Project>
